@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"encoding/hex"
 )
 
 func CacheError() {
@@ -96,6 +97,9 @@ func Json2float64(hh interface{}) float64 {
 	return float64(hh.(int))
 }
 
+
+type AesEncrypt struct {
+}
 
 func ParseRoom(str string) string {
 	defer CacheError()
