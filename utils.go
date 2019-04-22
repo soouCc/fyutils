@@ -8,7 +8,6 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
-	"encoding/hex"
 )
 
 func CacheError() {
