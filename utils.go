@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"math/rand"
 )
 
 func CacheError() {
@@ -96,3 +97,54 @@ func Json2float64(hh interface{}) float64 {
 	return float64(hh.(int))
 }
 
+func FindIntIn(arr []int32, cd int32) bool {
+	for i := 0; i < len(arr); i++ {
+		if cd == arr[i] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func RemoveCards(cds []int32, value int32, count int32) []int32 {
+	res := make([]int32, 0)
+	cnt := int32(0)
+	for _, v := range cds {
+		if v != value {
+			res = append(res, v)
+		} else {
+			if count == -1 {
+				continue
+			}
+			if cnt < count {
+				cnt++
+			} else {
+				res = append(res, v)
+			}
+		}
+	}
+	return res
+}
+
+//获取一个次数范围外的随机数
+func RandExp(min,max int,p int) int{
+
+	n := rand.Intn(max-min+1) + min
+	if n==p{
+		return RandExp(min,max ,p )
+	}
+	return n
+}
+
+func RemoveSlice(source []int32, target []int32) []int32 {
+	for i := 0; i < len(target); i++ {
+		for j := len(source) - 1; j >= 0; j-- {
+			if target[i] == source[j] {
+				source = append(source[:j], source[j+1:]...)
+				break
+			}
+		}
+	}
+	return source
+}
