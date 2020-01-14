@@ -10,7 +10,7 @@ import (
 // 限速
 type RateLimit struct {
 	sync.RWMutex
-	Stats       int  			//状态  0：为打开     1：打开
+	Stats       int  			//状态  0：未打开     1：打开
 	Data   		map[string]map[string]*RateItem      // uid:{cmd:RateItem}
 	Source   	map[string]int64					 //设置限速 原始数据  map[cmd]限制请求时间间隔
 }
@@ -18,6 +18,7 @@ type RateLimit struct {
 type RateItem struct {
 	LastTimestamp	int64		//上次请求时间戳
 	Rate 			int64	    //限制请求时间间隔(毫秒秒)
+	Num 			int64	    //限制请求时间间隔(毫秒秒)
 }
 
 func (ri *RateLimit)CheckValid(area string,uid int32,cmd string)(bool,int64)  {
@@ -28,6 +29,9 @@ func (ri *RateLimit)CheckValid(area string,uid int32,cmd string)(bool,int64)  {
 		}
 	}()
 
+	defer ri.Unlock()
+	ri.Lock()
+	
 	if ri.Data==nil{
 		ri.Data = make(map[string]map[string]*RateItem)
 		return true,0
@@ -38,9 +42,9 @@ func (ri *RateLimit)CheckValid(area string,uid int32,cmd string)(bool,int64)  {
 	}
 
 	key := fmt.Sprintf("%s_%d",area,uid)
-	if ri.Data[key]==nil{
-		ri.Data[key] = make(map[string]*RateItem)
-	}
+	//if ri.Data[key]==nil{
+	//	ri.Data[key] = make(map[string]*RateItem)
+	//}
 
 	if ri.Data[key]==nil{
 		ri.Data[key] = make(map[string]*RateItem)
@@ -57,13 +61,12 @@ func (ri *RateLimit)CheckValid(area string,uid int32,cmd string)(bool,int64)  {
 
 	tm_now := time.Now().UnixNano()/1000000
 	tm := tm_now - ri.Data[key][cmd].LastTimestamp
-	if tm>=ri.Data[key][cmd].Rate{
-
+	ri.Data[key][cmd].LastTimestamp = tm_now
+	if tm>=ri.Source[cmd]{
 		// 替换当前时间戳
-		ri.Data[key][cmd].LastTimestamp = tm_now
+		//ri.Data[key][cmd].LastTimestamp = tm_now2
 		return true,tm
 	}
-
 	return false,tm
 }
 
